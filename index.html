@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head> <!-- --> </head>
+
+<body>
+	<div id="videoWrap">
+		<video hidden id="c_video" width="900" height = "900" autoplay ></video>
+
+<br>
+<canvas hidden id="c1" width="900" height="600"></canvas>
+<canvas id="c2" width="900" height="600"></canvas>
+
+	</div>
+
+	<!--
+	<input type="button" value="カメラ起動" onclick="cameraInitSmartphoneSupport()">
+	-->
+</body>
+
+<script>
+	// 1-i c_videoオブジェクトを取得する
+	const c_video = document.getElementById('c_video');
+	//c_video.autoplay = true;
+
+	// 2-i MediaDevicesオブジェクトを用意する
+	const media = navigator.mediaDevices;
+
+	// 2-ii Webカメラを使っていいかユーザに聞く
+	const constraints = { audio: false, video: true };
+	media.getUserMedia(constraints)
+
+	// 2-iii 取得できた映像・音声データを処理する
+	.then(function (stream) {
+	c_video.srcObject = stream;
+});
+
+
+//------------------------------------
+
+  let c1 = document.getElementById("c1");
+  let ctx1 = c1.getContext("2d");
+
+  let c2 = document.getElementById("c2");
+  let ctx2 = c2.getContext("2d");
+
+  c_video.addEventListener("play",() => {
+      timerCallback();
+    },
+    false,
+  );
+
+//-------------------------------------------
+function timerCallback() {
+  if (c_video.paused || c_video.ended) {
+    return;
+  }
+  computeFrame();
+  setTimeout(() => {
+    timerCallback();
+  }, 0);
+}
+
+
+function computeFrame() {
+  ctx1.drawImage(c_video, 0, 0, 900, 600);
+  const frame = ctx1.getImageData(0, 0, 900, 600);
+  const data = frame.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const red = data[i + 0];
+    const green = data[i + 1];
+    const blue = data[i + 2];
+    //if (green > 100 && red > 100 && blue < 43) {
+
+    if (green > 100) {
+      data[i + 1] = 255;
+    }
+  }
+  ctx2.putImageData(frame, 0, 0);
+};
+
+
+</script>
+	<!-- <script src="main.js"></script> -->
+
+</html>
